@@ -1,0 +1,39 @@
+services:
+  db: # Base de datos de PostgreSQL cuyo alias es 'db'
+    image: postgres:17-alpine
+    environment: # Credenciales necesarias para la base de datos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tasks_db
+    ports:
+      - "5433:5432" # Mapeo opcional para maquina host donde puerto-local:puerto-container
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tasks_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  migrate: # Servicio de migraciones de Prisma
+    build:
+      context: .
+      target: builder 
+    command: npx prisma migrate deploy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tasks_db # IMP: Usamos el alias 'db' para acceder a la db del container
+    depends_on:
+      db:
+        condition: service_healthy
+  api: # Servicio de la API (backend)
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tasks_db # Usamos alias 'db'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
