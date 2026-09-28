@@ -1,0 +1,37 @@
+name: Mi primer CI
+
+# Eventos de ejecución (pushes y pull requests sobre main)
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Usamos una VM con Ubuntu
+
+    steps:
+      - name: Descarga del repo mediante checkout
+        uses: actions/checkout@v4 # Action para pullear el codigo del repo
+
+      - name: Instalar node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci # Este es el postintall que ejecuta prisma generate (ver package.json)
+
+      - name: Lint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: Testing unitario
+        run: npm test
+
+      - name: Build de la app
+        run: npm run build
+
+      - name: Build de la imagen de docker
+        run: docker build -t tasks-api:${{ github.sha }} . 
