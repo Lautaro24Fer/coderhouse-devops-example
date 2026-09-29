@@ -21,7 +21,8 @@
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy"
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "ci": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
