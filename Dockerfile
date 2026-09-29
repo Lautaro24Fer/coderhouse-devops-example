@@ -15,6 +15,11 @@ RUN npm run build
 # ---------- Etapa 2: runtime ----------
 FROM node:24-alpine AS runner
 
+LABEL org.opencontainers.image.source="https://github.com/Lautaro24Fer/coderhouse-devops-example" \
+      org.opencontainers.image.description="API backend en NestJS + Prisma del curso de DevOps de coderhouse" \
+      org.opencontainers.image.licenses="UNLICENSED" \
+      org.opencontainers.image.title="mi-api"
+
 ENV NODE_ENV=production
 WORKDIR /app
 
