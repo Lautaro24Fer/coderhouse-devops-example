@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest # Usamos una VM con Ubuntu
 
-    permissions: # Agregamos los permisos necesarios para que el workflow pueda hacer cambios en el repo (Subir imagenes buildeadas directamente a GHCR)
+    permissions: # Agregamos los permisos necesarios para que el workflow pueda publicar paquetes(Subir imagenes buildeadas directamente a GHCR)
       contents: read
       packages: write
 
@@ -51,9 +51,11 @@ jobs:
         run: |
           docker build \
             -t ghcr.io/lautaro24fer/mi-api:${{ github.sha }} \
+            -t ghcr.io/lautaro24fer/mi-api:latest \
             .
 
       - name: Push de imagen a GHCR
         if: github.event_name == 'push'
         run: |
           docker push ghcr.io/lautaro24fer/mi-api:${{ github.sha }} 
+          -t ghcr.io/lautaro24fer/mi-api:latest \
