@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest # Usamos una VM con Ubuntu
 
+    permissions: # Agregamos los permisos necesarios para que el workflow pueda hacer cambios en el repo (Subir imagenes buildeadas directamente a GHCR)
+      contents: read
+      packages: write
+
     steps:
       - name: Descarga del repo mediante checkout
         uses: actions/checkout@v4 # Action para pullear el codigo del repo
@@ -33,5 +37,23 @@ jobs:
       - name: Build de la app
         run: npm run build
 
+      # Login, buildeo y push a GHCR
+      - name: Login en GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build de la imagen de docker
-        run: docker build -t tasks-api:${{ github.sha }} . 
+        if: github.event_name == 'push'
+        run: |
+          docker build \
+            -t ghcr.io/lautaro24fer/mi-api:${{ github.sha }} \
+            .
+
+      - name: Push de imagen a GHCR
+        if: github.event_name == 'push'
+        run: |
+          docker push ghcr.io/lautaro24fer/mi-api:${{ github.sha }} 
